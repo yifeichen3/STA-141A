@@ -1,0 +1,118 @@
+---
+title: "HW2"
+author: "Yifei Chen"
+date: "October 31, 2019"
+output: pdf_document
+---
+---
+title: "HW1"
+author: "Yifei Chen"
+date: "October 14, 2019"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Honor Code:"The codes and results derived by using these codes constitutemy own work. I have consulted the following resources regarding this assignment: Chao Cheng
+##1
+```{r}
+data <- get(load('C:/Users/yifeichen3/Downloads/pm2.5data.RData'))
+library(car)
+## I command scatterplotMatrix down because it will take several hours
+## to compile
+#scatterplotMatrix( ~ pm2.5 + DEWP + TEMP + PRES + cbwd + Iws + Is + Ir, data = data,spread=FALSE,span = 0.8,diagonal = "histogram",main = "Scatter plot matrix")
+# pairs(~ pm2.5 + DEWP + TEMP + PRES + cbwd + Iws + Is + Ir, data = data, main = "Basic scatter plot matrix") 
+library(corrgram)
+corrgram(data, order = TRUE,
+         lower.panel = panel.shade, upper.panel = panel.pie,
+         text.panel = panel.txt,
+         main = "Correlogram of pm2.5 data")
+```
+##2
+```{r}
+library(ggplot2)
+data.dfz = ggplot(data, aes(x=month,y=pm2.5))
+data.lm1 = lm(pm2.5 ~ month, data=data)
+summary(data.lm1)
+data.lm2 = lm(pm2.5 ~ month + hour, data=data)
+summary(data.lm2)
+data.lm3 = lm(pm2.5 ~ month + cbwd, data=data)
+summary(data.lm3)
+data.dfz + geom_point()
+data.dfx = ggplot(data,aes(x=hour,y=pm2.5))
+data.dfx + aes(color=factor(hour)) + geom_boxplot() + facet_grid(month ~ .)
+data.dfy = ggplot(data,aes(x=cbwd,y=pm2.5))
+data.dfy + aes(color=factor(cbwd)) + geom_boxplot() + facet_grid(month ~ .)
+```
+##3
+```{r}
+library(ggplot2)
+# DEWP vs TEMP 
+data.diam1 = ggplot(data, aes(x = DEWP, y = TEMP))
+data.diam1 + aes(color=DEWP) + geom_boxplot() + facet_wrap(~month)     
+data.diam1 + aes(color=DEWP) + geom_point() + facet_wrap(~month) 
+data.diam1 + aes(color=DEWP) + geom_point() + facet_grid(year ~ .)+geom_smooth(method="lm",se=F,color=alpha("black",0.5),size=0.8)
+data.diam1 + aes(color=DEWP) + geom_point(alpha=I(1/2), shape='.', size=I(4)) + facet_wrap(~hour) + geom_smooth(method="lm",se=F,color=alpha("black",0.5),size=0.8)
+# PRES vs TEMP 
+data.diam2 = ggplot(data, aes(x = PRES, y = TEMP))
+data.diam2 + aes(color=PRES) + geom_boxplot() + facet_wrap(~month) 
+data.diam2 + aes(color=PRES) + geom_point() + facet_wrap(~month)
+data.diam2 + aes(color=PRES) + geom_point() + facet_grid(year ~ .)+geom_smooth(method="lm",se=F,color=alpha("black",0.5),size=0.8)
+data.diam2 + aes(color=PRES) + geom_point(alpha=I(1/2), shape='.', size=I(4)) + facet_wrap(~hour) + geom_smooth(method="lm",se=F,color=alpha("black",0.5),size=0.8)
+# DEWP vs PRES 
+data.diam3 = ggplot(data, aes(x = DEWP, y = PRES))
+data.diam3 + aes(color=DEWP) + geom_boxplot() + facet_wrap(~month) 
+data.diam3 + aes(color=DEWP) + geom_point() + facet_wrap(~month)
+data.diam3 + aes(color=DEWP) + geom_point() + facet_grid(year ~ .)+geom_smooth(method="lm",se=F,color=alpha("black",0.5),size=0.8)
+data.diam3 + aes(color=DEWP) + geom_point(alpha=I(1/2), shape='.', size=I(4)) + facet_wrap(~hour) + geom_smooth(method="lm",se=F,color=alpha("black",0.5),size=0.8)
+```
+#4
+```{r}
+#delete the rows with missing values
+data= na.omit(data)
+###DEWP
+data.lm1 = lm(pm2.5~DEWP+TEMP+PRES+month+hour+cbwd+Iws+Is+Ir+TEMP*cbwd+TEMP*month+TEMP*hour+PRES*cbwd+PRES*month+PRES*hour+DEWP*cbwd+DEWP*month+DEWP*hour, data=data)
+summary(data.lm1)
+data.bind1 = cbind(data,resid=data.lm1$resid)
+# add the residuals as additional column of the data frame
+pl.di.lm2 = ggplot(data.bind1, aes(DEWP,resid))
+#residual plots show patterns that indicate that clarity has a role
+pl.di.lm2 + geom_point(alpha=I(1/5),shape='.') + facet_grid(month ~ hour)
+pl.di.lm2 + geom_point(alpha=I(1/5),shape='.') + facet_grid(month ~ cbwd)
+#omit cbwd
+data.lm2 = lm(formula = pm2.5 ~ DEWP + TEMP + PRES + month + hour + 
+                Iws + Is + Ir + + TEMP * month + TEMP * hour + 
+                PRES * cbwd + PRES * month + PRES * hour + 
+                DEWP * month + DEWP * hour, data = data)
+
+summary(data.lm2)
+data.bind2 = cbind(data,resid=data.lm2$resid)
+#omit hour
+data.lm3 = lm(formula = pm2.5 ~ DEWP + TEMP + PRES + month + 
+                Iws + Is + Ir + TEMP * month + PRES * month + 
+                DEWP * month, data = data)
+
+summary(data.lm3)
+# omit DEWP * month
+data.lm3 = lm(formula = pm2.5 ~ DEWP + TEMP + PRES + month + 
+                Iws + Is + Ir + TEMP * month + PRES * month + 
+                DEWP * month, data = data)
+
+summary(data.lm3)
+data.bind2 = cbind(data,resid=data.lm2$resid)
+# add the residuals as additional column of the data frame
+pl.di.lm2 = ggplot(data.bind2, aes(TEMP,resid))
+#residual plots show patterns that indicate that clarity has a role
+pl.di.lm2 + geom_point(alpha=I(1/5),shape='.') + facet_grid(month ~ .)
+# add the residuals as additional column of the data frame
+pl.di.lm3 = ggplot(data.bind2, aes(PRES,resid))
+#residual plots show patterns that indicate that clarity has a role
+pl.di.lm3 + geom_point(alpha=I(1/5),shape='.') + facet_grid(month ~ .)
+```
+### R Appendix
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```

@@ -1,0 +1,139 @@
+---
+title: "HW4"
+author: "Yifei Chen"
+date: "December 2, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Honor Code:"The codes and results derived by using these codes constitutemy own work. I have consulted the following resources regarding this assignment: Chao Cheng
+
+## 1
+```{r}
+# a
+data = read.csv('customers_data.csv', header = TRUE)
+summary(data)
+# b
+customers_2 = data.frame('FRESH' = data$Fresh, 'FROZEN' = data$Frozen)
+# c
+library(GGally)
+ggpairs(customers_2, 1:2, mapping = ggplot2::aes(alpha = 0.5), 
+        diag = list(continuous = wrap("densityDiag")), 
+        lower= list(continuous = wrap("points", alpha=0.9)))
+```
+## 2
+```{r}
+## Choice of k studying the within variance
+# functions
+n=dim(customers_2)[1]
+
+## Choice of k studying the within variance
+
+withinss <- function(group, x, centers, assignments) {
+  cent <- centers[group, ]
+  m <- rbind(cent, x[assignments==group, 1:2])
+  sum((as.matrix(dist(m))[1, ])^2)
+}
+
+predict.kmeans <- function(object,
+                           newdata,
+                           method = c("centers", "classes")) {
+  method <- match.arg(method)
+  
+  centers <- object$centers
+  ss_by_center <- apply(centers, 1, function(x) {
+    colSums((t(newdata) - x) ^ 2)
+  })
+  best_clusters <- apply(ss_by_center, 1, which.min)
+  
+  if (method == "centers") {
+    centers[best_clusters, ]
+  } else {
+    best_clusters
+  }
+}
+
+set.seed(12)
+train_p=0.8;
+# run 100 times
+N=100
+# k= 1,...,10
+n_clust=10
+within_c_n=matrix(0,n_clust,N)
+within_c=vector('numeric',0)
+dfxy=customers_2
+
+for(cl in 1:n_clust){
+  for(iter in 1:N){
+    # draw randomly the 80% of observations in customer_2 and use them as a training data-set.
+    train=sample(1:n,train_p*n)
+    train=sort(train)
+    test=sort(setdiff(1:n,train))
+    # run the function kmeans on the training data-set with k centers,20 random starts and 100 maximum iterations;
+    dfxy.km_train=kmeans(dfxy[train,1:2],centers=cl, nstart = 20, iter.max = 100)
+    centers <- dfxy.km_train$centers
+    # use the estimated centers to allocate the observations of the test data-set to a specific group and derive the relative vector of assignments;
+    assignments <-  as.numeric(row.names(predict.kmeans(dfxy.km_train, (dfxy[test,1:2]))))
+    # calculate the deviance within estimated groups in the test data-set.
+    within_c_n[cl,iter]=sum(sapply(seq(nrow(centers)), function(y){withinss(group=y,x = dfxy[test,1:2], centers = centers, assignments = assignments)}))
+  }
+  # For each k, average the deviance within groups over the 100 runs
+  within_c[cl]=(mean(within_c_n[cl,]))
+}
+
+within_c
+```
+
+```{r}
+# plot this average over the number of clusters 
+plot(within_c, type = "b")
+```
+# From the plot, we can see that 3 can be considered as an indicator of the appropriate number of clusters
+```{r}
+# re-apply kmeans with the selected number of clusters,20 random starts and 100 maximum iterations, and derive the estimated cluster memberships;
+dfxy.km = kmeans(dfxy[,1:2], centers=3, nstart = 20, iter.max = 100)
+dfxy.km$cluster
+# provide a scatter-plot matrix of FRESH and FROZEN conditional on the estimated cluster memberships via the function ggpairs
+customers_2$cl_kmeans = as.factor(dfxy.km$cluster)
+ggpairs(customers_2, 1:3, mapping = ggplot2::aes(color = cl_kmeans, alpha = 0.5), 
+        diag = list(continuous = wrap("densityDiag")), 
+        lower=list(continuous = wrap("points", alpha=0.9)))
+```
+# From the density graph of the FRESH column, we can see that most of the data belongs to the first cluster, while only several data is counted as the third cluster. Same results as the density graph of the FROZEN column. From the boxplot graph of the FRESH column, we can see that the values in the third cluster are the highest, while the data in the first cluster has the lowest values. However, from the boxplot graph of the FROZEN column, we can see that the values from different clusters are mostly within the same range, but the values of the third cluster are more scatter comparing to the other two. 
+
+## 3
+```{r}
+# Estimate a hierachical partition on FRESH and FROZEN by the complete linkage usingthe number of clusters selected above.
+ass_hclust=function(i,method='complete',test){
+  dist_hclust=as.matrix(dist(rbind(dfxy[test,1:2],dfxy[assignment_train==i,1:2])))
+  n_dist=length(test)+length(which(assignment_train==i))
+  dist_hclust=as.matrix(dist_hclust)
+  if(method=='complete'){
+    return(sapply(1:length(test),function(j){max(dist_hclust[(length(test)+1):n_dist,j])}))}
+  if(method=='single'){
+    return(sapply(1:length(test),function(j){min(dist_hclust[(length(test)+1):n_dist,j])}))}  
+  if(method=='average'){
+    return(sapply(1:length(test),function(j){mean(dist_hclust[(length(test)+1):n_dist,j])}))}
+}
+dfxy.complete = hclust(dist(customers_2), method = "complete")
+plot(dfxy.complete ,main = "Complete Linkage", xlab="", sub ="", cex =.5)
+# Derive the estimated cluster memberships.
+# choose k=3
+assignment=cutree(dfxy.complete, 3)
+table(assignment)
+```
+
+```{r}
+# Provide a scatter-plot matrix of FRESH and FROZEN conditional on the estimated cluster memberships via the function ggpairs
+customers_2$cl_complete=as.factor(assignment)
+ggpairs(customers_2, c(1:2,4), mapping = ggplot2::aes(color = cl_complete, alpha = 0.5), 
+        diag = list(continuous = wrap("densityDiag")), 
+        lower=list(continuous = wrap("points", alpha=0.9)))
+```
+# From the scatter plot of FRESH, we can see that there is only one value on the third cluster, and the value is larger than the those in the first and the second cluster. In addition, from the density graph of the FRESH column, we observe that most of the data belongs to the first cluster, then the second cluster. Same as the FROZEN column. By looking at the boxplot of the FRESH column, we can see that the value in the third cluster is the largest, and the data in the first cluster has the lowest values. And from the boxplot of the FROZEN column, the values in the first and the second clusters are within the same range, but the second cluster is more spread compared to the first one. By comparing this outcome to the k-means one, we can see that the number of values in the third cluster are obviously less and larger than the k-means one. However, the density and the range of the first and second clusters in both outcomes are similar.
+
+### R Appendix
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```

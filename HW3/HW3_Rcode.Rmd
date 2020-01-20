@@ -1,0 +1,90 @@
+---
+title: "HW3"
+author: "Yifei Chen"
+date: "November 20, 2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Honor Code:"The codes and results derived by using these codes constitutemy own work. I have consulted the following resources regarding this assignment: Chao Cheng
+
+## 1
+```{r}
+load('C:/Users/yifeichen3/OneDrive/academic/2019 Fall/STA 141A/lung.RData')
+test_index = sample(nrow(lung), nrow(lung)*.2)
+test_data = lung[test_index, ]
+# sort the test_data by index
+test_data = test_data[order(as.numeric(row.names(test_data))),]
+train_data = lung[-test_index, ]
+```
+## 2
+```{r}
+# (a) Report the class-speci???c means of the predictor variables for the training data.
+smoke_years = lung[, 2]
+second_hand_years = lung[, 3]
+biopsy = as.factor(lung[, 1])
+library(MASS)
+# Use linear discriminant analysis to the training data.
+lung.lda = lda(biopsy ~ smoke_years + second_hand_years, train_data)
+lung.lda
+# Predict for test data.
+lung.lda.pred = predict(lung.lda, test_data)
+# (b) Compute theconfusion matrixfor the test data, and the misclassification error rate.
+# Create the confusion matrix by tabulating true classes against predicted classes.
+lung.lda.conf = table(true = test_data$biopsy, predicted = lung.lda.pred$class)
+```
+### 3
+```{r}
+## (a) Fit a logistic regression model to the training data, using the variablessmoke_yearsandsecond_hand_yearsas predictors.
+# use family = binomial with the glm function for a two-class logistic rgression
+lung.glm = glm(biopsy ~ smoke_years + second_hand_years, train_data, family = binomial)
+# (i) Obtain the estimates and their standard errors for the model parameters.
+# overall summary
+summary(lung.glm)
+# (ii) Compute the confusion matrix for the test data, and the misclassi???cation error rate. 
+# Predict for test data. Use type = "response" to get class probabilities.
+lung.glm.pred.prob = predict(lung.glm, test_data, type = "response")
+lung.glm.pred = (lung.glm.pred.prob > 0.5) + 0
+# Create the confusion matrix by tabulating true classes against predicted classes.
+lung.glm.conf = table(true = test_data$biopsy, predicted = lung.glm.pred)
+lung.glm.conf
+# (iii) Which is the most relevant predictor for the purpose ofclassification? Justify.
+## (b) Fit a logistic regression model to the training data, using the variablesmoke_yearsas a one-dimensional predictor.
+lung.glm2 = glm(biopsy ~ smoke_years, train_data, family = binomial)
+# (i) Obtain the estimates and their standard errors for the model parameters.
+summary(lung.glm2)
+# (ii) Compute the confusion matrix for the test data, and the misclassification error rate.
+lung.glm.pred.prob2 = predict(lung.glm2, test_data, type = "response")
+lung.glm.pred2 = (lung.glm.pred.prob2 > 0.5) + 0
+# Create the confusion matrix by tabulating true classes against predicted classes.
+lung.glm.conf2 = table(true = test_data$biopsy, predicted = lung.glm.pred2)
+lung.glm.conf2
+# (iii) Compare the results with those in 3(a).  Does your result in 3(b)(ii) support theanswer to 3(a)(iii) ?
+```
+## 4
+```{r}
+# Use knn() from package class for k-nearest neighbors.
+library(class)
+# Use the kNN classifier with k = 20
+lung.knn.20 = knn(
+  train = train_data[c("smoke_years", "second_hand_years")], # training data for features used in classification
+  test = test_data[c("smoke_years", "second_hand_years")], # test data data for features used in classification
+  cl = train_data$biopsy, # vector of class labels for training data
+  k = 20)
+lung.knn.conf.20 = table(true = test_data$biopsy, predicted = lung.knn.20)
+lung.knn.conf.20
+# Use the kNN classifier with k = 50
+lung.knn.50 = knn(
+  train = train_data[c("smoke_years", "second_hand_years")], # training data for features used in classification
+  test = test_data[c("smoke_years", "second_hand_years")], # test data data for features used in classification
+  cl = train_data$biopsy, # vector of class labels for training data
+  k = 50)
+lung.knn.conf.50 = table(true = test_data$biopsy, predicted = lung.knn.50)
+lung.knn.conf.50
+```
+
+### R Appendix
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```

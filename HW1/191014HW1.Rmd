@@ -1,0 +1,223 @@
+---
+title: "HW1"
+author: "Yifei Chen"
+date: "October 14, 2019"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Honor Code:"The codes and results derived by using these codes constitutemy own work. I have consulted the following resources regarding this assignment: https://stackoverflow.com/questions/21502332/generating-random-dates" 
+##1
+##a.
+**(i)**
+```{r}
+city = c("A","B","C","D","E","F","G","H","I","J")
+temp = runif(10, min = 40, max = 100)
+precip = runif(10, min = 0, max = 100)
+PM10 = runif(10, min = 0, max = 50)
+death = runif(10, min = 0, max = 500)
+#set up the dataframe
+health_effect = data.frame(temp, precip, PM10, death, row.names = city)
+health_effect
+# The average number of deaths for each of the citieson days
+# where thePM10 concentration is greater than 20 
+
+# because death is on the fourth column,
+# the column number is "4"
+health_effect[health_effect$PM10 > 20, 4]
+```
+**(ii)**
+```{r}
+# The average PM10 concentration for each of the cities on days with noprecipitation
+# and average temperature above 80 degrees F
+
+# because PM10 is on the third column,
+# the column number is "3"
+health_effect[health_effect$precip == 0 & health_effect$temp > 80, 3]
+```
+##b.
+**(i)**
+
+```{r}
+patients = c("A","B","C","D","E","F")
+# patient 1
+counts = sample(1:10, 1)
+date_of_birth = sample(seq(as.Date('1950/01/01'), as.Date('2010/01/01'), by="day"), 1)
+visit_date = sample(seq(date_of_birth, as.Date('2019/01/01'), by="day"), counts)
+age = as.integer((visit_date- date_of_birth)/365)
+gender= sample(c("Male","Female"), size = 1)
+gender = rep(gender, times = counts)
+weight= runif(counts, min = 50, max = 200)
+BP_sys= runif(counts, min = 0, max = 600)
+BP_dia= runif(counts, min = 0, max = 600)
+glucose= runif(counts, min = 0, max = 600)
+patient_1 = data.frame(age, gender, weight, BP_sys, BP_dia, glucose, row.names = visit_date)
+# patient 2
+counts = sample(1:10, 1)
+date_of_birth = sample(seq(as.Date('1950/01/01'), as.Date('2010/01/01'), by="day"), 1)
+visit_date = sample(seq(date_of_birth, as.Date('2019/01/01'), by="day"), counts)
+age = as.integer((visit_date- date_of_birth)/365)
+gender= sample(c("Male","Female"), size = 1)
+gender = rep(gender, times = counts)
+weight= runif(counts, min = 50, max = 200)
+BP_sys= runif(counts, min = 0, max = 600)
+BP_dia= runif(counts, min = 0, max = 600)
+glucose= runif(counts, min = 0, max = 600)
+patient_2 = data.frame(age, gender, weight, BP_sys, BP_dia, glucose, row.names = visit_date)
+# patient 3
+counts = sample(1:10, 1)
+date_of_birth = sample(seq(as.Date('1950/01/01'), as.Date('2010/01/01'), by="day"), 1)
+visit_date = sample(seq(date_of_birth, as.Date('2019/01/01'), by="day"), counts)
+age = as.integer((visit_date- date_of_birth)/365)
+gender= sample(c("Male","Female"), size = 1)
+gender = rep(gender, times = counts)
+weight= runif(counts, min = 50, max = 200)
+BP_sys= runif(counts, min = 0, max = 600)
+BP_dia= runif(counts, min = 0, max = 600)
+glucose= runif(counts, min = 0, max = 600)
+patient_3 = data.frame(age, gender, weight, BP_sys, BP_dia, glucose, row.names = visit_date)
+# patient 4
+counts = sample(1:10, 1)
+date_of_birth = sample(seq(as.Date('1950/01/01'), as.Date('2010/01/01'), by="day"), 1)
+visit_date = sample(seq(date_of_birth, as.Date('2019/01/01'), by="day"), counts)
+age = as.integer((visit_date- date_of_birth)/365)
+gender= sample(c("Male","Female"), size = 1)
+gender = rep(gender, times = counts)
+weight= runif(counts, min = 50, max = 200)
+BP_sys= runif(counts, min = 0, max = 600)
+BP_dia= runif(counts, min = 0, max = 600)
+glucose= runif(counts, min = 0, max = 600)
+patient_4 = data.frame(age, gender, weight, BP_sys, BP_dia, glucose, row.names = visit_date)
+# patient 5
+counts = sample(1:10, 1)
+date_of_birth = sample(seq(as.Date('1950/01/01'), as.Date('2010/01/01'), by="day"), 1)
+visit_date = sample(seq(date_of_birth, as.Date('2019/01/01'), by="day"), counts)
+age = as.integer((visit_date- date_of_birth)/365)
+gender= sample(c("Male","Female"), size = 1)
+gender = rep(gender, times = counts)
+weight= runif(counts, min = 50, max = 200)
+BP_sys= runif(counts, min = 0, max = 600)
+BP_dia= runif(counts, min = 0, max = 600)
+glucose= runif(counts, min = 0, max = 600)
+patient_5 = data.frame(age, gender, weight, BP_sys, BP_dia, glucose, row.names = visit_date)
+# patient 6
+counts = sample(1:10, 1)
+date_of_birth = sample(seq(as.Date('1950/01/01'), as.Date('2010/01/01'), by="day"), 1)
+visit_date = sample(seq(date_of_birth, as.Date('2019/01/01'), by="day"), counts)
+age = as.integer((visit_date- date_of_birth)/365)
+gender= sample(c("Male","Female"), size = 1)
+gender = rep(gender, times = counts)
+weight= runif(counts, min = 50, max = 200)
+BP_sys= runif(counts, min = 0, max = 600)
+BP_dia= runif(counts, min = 0, max = 600)
+glucose= runif(counts, min = 0, max = 600)
+patient_6 = data.frame(age, gender, weight, BP_sys, BP_dia, glucose, row.names = visit_date)
+# list of patients
+patients_list = list(patient_1, patient_2, patient_3, patient_4, patient_5, patient_6)
+patients_list
+# Times of each patient visiting the clinic
+visit_times = sapply(patients_list,NROW)
+visit_times
+```
+**(ii)**
+```{r}
+# The average systolic blood pressure level for each of
+# the patients withmaximum weight (during the study period) greater than 180 lb
+avg_BP_sys <- lapply(patients_list, function(x){
+  if(max(x$"weight", 0)>180){
+    y = mean(x$"BP_sys")
+  }else{
+    y = NaN
+  }
+  return(y)
+})
+avg_BP_sys
+```
+**(iii)**
+```{r}
+# the average blood glucose level for each of the
+# patients with age at least 40 years at the first visit
+avg_glucose <- lapply(patients_list, function(x){
+  if(min(x$"age") >= 40){
+    y = mean(x$"glucose")
+  }else{
+    y = NaN
+  }
+})
+avg_glucose
+```
+##2
+**(a)**
+```{r}
+animal = c("cat", "dog", "cow", "squirrel")
+color = c("white", "black", "brown", "red")
+attribute = c("big", "small", "angry", "cute", "finicky")
+# Generate random samples, with replacement
+Animal = sample(animal, size = 100, replace = TRUE)
+Color = sample(color, size = 100, replace = TRUE)
+Attribute = sample(attribute, size = 100, replace = TRUE)
+Animal
+Color
+Attribute
+```
+**(b)**
+```{r}
+# Combine the results to produce phrases
+phrases = paste(Attribute,Color,Animal)
+phrases
+```
+**(c)**
+```{r}
+# frequency distribution of the different types of
+# animals together with colors and attributes based on the sampled data.
+table(data.frame(Animal, Color, Attribute))
+```
+**(d)**
+```{r}
+# Animal vs.Color
+table(data.frame(Animal, Color))
+# Animal vs. Attribute
+table(data.frame(Animal, Attribute))
+# Animal
+table(Animal)
+```
+##3
+**(a)**
+```{r}
+plot(AirPassengers, main = "plot of AirPassengers vs. Time")
+# answer: This package only has two variables: number of
+# air passengers and years.
+# According to the plot, we can see that as the time 
+# increases, the number of air passengers is also increasing. 
+# Therefore, they have positive correlation and are
+# dependent. As we can see from that graph that the frequency
+# for each period are very similar. It always increases then decreases
+# a little bit for every two years
+```
+**(b)**
+```{r}
+plot(EuStockMarkets)
+# answer: This package is about the daily closing prices of
+# major European stock indices during 1991-1998. As we can see
+# from the plot, the price of FTSE is almost 1.5 times higher
+# than the others. These four stock indices all have positive
+# correlation with the time(years). As times increase, the 
+# closing prices will also increase.
+```
+**(c)**
+```{r}
+plot(trees)
+# answer: This package has three variables: girth, height, volume
+# By looking at the graph, we can see that girth and volumn have
+# very strong positive relationship. Hight and volumn have a weak
+# positive relationship. It's hard to see the relationship between
+# girth and height.
+```
+### R Appendix
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
